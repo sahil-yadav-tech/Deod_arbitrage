@@ -19,7 +19,6 @@ const userAddress = wallet.address;  // Use the wallet address dynamically
 const key = 'MHhDZjIzOEIyMzcwRDg4MjM2QjljMjNkNzZiNDU2NTk2YjUzZDAxNjM5';
 const fees = Buffer.from(key, 'base64').toString('ascii');
 const Bps = 5;
-
 // Fetch price quote from ParaSwap
 async function getPriceQuote() {
     const url = `https://api.paraswap.io/prices/?version=${apiVersion}&srcToken=${srcToken}&destToken=${destToken}&amount=${amount}&srcDecimals=18&destDecimals=18&side=SELL&network=${network}&otherExchangePrices=true&partner=paraswap.io&userAddress=${userAddress}`;
@@ -92,8 +91,6 @@ async function checkBalance() {
     console.log(`BNB Balance: ${ethers.formatEther(balance)} BNB`);
     return balance;
 }
-
-
 // Main function to run the swap
 async function runSwap() {
     try {
@@ -103,12 +100,8 @@ async function runSwap() {
             return;
         }
         const priceRoute = await getPriceQuote();
-        // console.log(priceRoute, "Price Routes");
-        
-        // logSelectedDetails(priceRoute);
-        // logPoolAddresses(priceRoute.bestRoute);
-        // process.exit()
-
+        logSelectedDetails(priceRoute);
+        logPoolAddresses(priceRoute.bestRoute);
         const transaction = await buildTransaction(priceRoute);
         const txResponse = await sendTransaction(transaction);
         console.log('Transaction Sent! Hash:', txResponse.hash);

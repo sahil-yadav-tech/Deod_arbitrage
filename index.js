@@ -1,5 +1,4 @@
 console.log("JAI SHREE RAM / JAI BAJARANG BALI JI");
-const { promises } = require("dns");
 const bnbCurrentPrice = require("./constants/bnb_deod");
 const polygonCurrentPrice = require("./constants/polygon_deod");
 
@@ -28,7 +27,7 @@ const main = async () => {
     } else if (deod_polygon < deod_bnb) {
       console.log("BNB price is higher and Polygon price is lower.");
       // buy karunga polygon se and sell karunga bnb network par 
-      
+
     } else {
       console.log("Both prices are the same.");
     }

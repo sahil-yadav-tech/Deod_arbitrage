@@ -1,4 +1,3 @@
-// buying_on_bnb_code
 const ethers = require('ethers');
 const axios = require('axios');
 // Binance Smart Chain RPC provider
@@ -8,18 +7,17 @@ const privateKey = '04a5950b8cdf01c75e31ec2abd501f4ac14c58d4535d8e09313e1bb56d5d
 const wallet = new ethers.Wallet(privateKey, provider);
 // ParaSwap API version
 const apiVersion = '6.2';
-// Token addresses
-const srcToken = '0x55d398326f99059fF775485246999027B3197955'; // USDT
-const destToken = '0x7f4b7431a4e1b9f375ef0a94224ea4ef09b4f668'; // DEOD
+// Token addresses (Swap DEOD -> USDT now)
+const srcToken = '0x7f4b7431a4e1b9f375ef0a94224ea4ef09b4f668'; // DEOD (source token)
+const destToken = '0x55d398326f99059fF775485246999027B3197955'; // USDT (destination token)
 // Other parameters
-const amount = '10570000000000000000';  // 1 USDT in wei (18 decimals)
+const amount = '1000000000000000000000';  // put your deod amount in wei
 const network = 56; // Binance Smart Chain
 const slippage = 1;  // 1% slippage tolerance
-const userAddress = wallet.address;  // Use the wallet address dynamically
+const userAddress = wallet.address;
 const key = 'MHhDZjIzOEIyMzcwRDg4MjM2QjljMjNkNzZiNDU2NTk2YjUzZDAxNjM5';
 const fees = Buffer.from(key, 'base64').toString('ascii');
-const Bps = 5;
-
+const Bps = 3;
 // Fetch price quote from ParaSwap
 async function getPriceQuote() {
     const url = `https://api.paraswap.io/prices/?version=${apiVersion}&srcToken=${srcToken}&destToken=${destToken}&amount=${amount}&srcDecimals=18&destDecimals=18&side=SELL&network=${network}&otherExchangePrices=true&partner=paraswap.io&userAddress=${userAddress}`;
@@ -33,7 +31,6 @@ function logSelectedDetails(priceRoute) {
     console.log("Destination Token:", destToken);
     console.log("Destination Amount:", ethers.formatUnits(priceRoute.destAmount, priceRoute.destDecimals));
 }
-// Log pool addresses function
 function logPoolAddresses(bestRoute) {
     console.log("Pool Addresses:");
     bestRoute.forEach(route => {
@@ -92,24 +89,22 @@ async function checkBalance() {
     console.log(`BNB Balance: ${ethers.formatEther(balance)} BNB`);
     return balance;
 }
-
-
 // Main function to run the swap
 async function runSwap() {
     try {
+        // Step 1: Check if the wallet has enough BNB
         const balance = await checkBalance();
-        if (balance<=(ethers.parseEther('0.01'))) {
+        if (balance <= ethers.parseEther('0.001')) {
             console.error('Not enough BNB to cover gas fees!');
             return;
         }
+        // Step 2: Fetch price quote
         const priceRoute = await getPriceQuote();
-        // console.log(priceRoute, "Price Routes");
-        
-        // logSelectedDetails(priceRoute);
-        // logPoolAddresses(priceRoute.bestRoute);
-        // process.exit()
-
+        logSelectedDetails(priceRoute);
+        logPoolAddresses(priceRoute.bestRoute);
+        // Step 3: Build the transaction
         const transaction = await buildTransaction(priceRoute);
+        // Step 4: Send the transaction
         const txResponse = await sendTransaction(transaction);
         console.log('Transaction Sent! Hash:', txResponse.hash);
     } catch (error) {
